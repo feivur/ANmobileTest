@@ -45,11 +45,18 @@ public class NetworkService {
                             .header("Authorization", Credentials.basic(login,pass))
                             .build();
                 });
+                /*
+                //i хидеры надо добавлять так
+                .addInterceptor(chain ->{
+                    chain.request().newBuilder()
+                            .addHeader("User-Agent", "android")
+                            .addHeader("Content-Type", "application/json");
+                });*/
 
         RxJava3CallAdapterFactory rxAdapter = RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io());
 
         builder = new Retrofit.Builder()
-                .baseUrl(BASE_URL+"/")
+                .baseUrl(BASE_URL+"/") // надо было не добавлять слеш, только если его нет
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(rxAdapter);
 

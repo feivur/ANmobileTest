@@ -51,6 +51,8 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
 
     Collection<Post> posts = new ArrayList<>();
 
+    //w эти разрешения точно нужны?
+    // По условию задания нужен только INTERNET, и то, запрашивать его не нужно
     String[] permissions = new String[]{
             Manifest.permission.INTERNET,
             Manifest.permission.READ_PHONE_STATE,

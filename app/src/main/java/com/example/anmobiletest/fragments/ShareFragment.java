@@ -33,6 +33,7 @@ import static com.example.anmobiletest.HomeActivity.APP_PREFERENCES_LOGIN;
 import static com.example.anmobiletest.HomeActivity.APP_PREFERENCES_PASSWORD;
 import static com.example.anmobiletest.HomeActivity.APP_PREFERENCES_URL;
 
+//i название сбивает с толку. Может быть лучше ConnectionFragment?
 public class ShareFragment extends Fragment {
     GetApiMethods getApiMethods = NetworkService.getInstance().createService(GetApiMethods.class);
     private Button submit_button;
@@ -57,6 +58,7 @@ public class ShareFragment extends Fragment {
         EditText loginText = root.findViewById(R.id.login_input);
         EditText passwordText = root.findViewById(R.id.password_input);
         submit_button = root.findViewById(R.id.submit_input);
+        //e progressBar бесполезен - его закрывает клавиатура
         GifImageView progressBar = root.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.INVISIBLE);
         submit_button.setEnabled(false);
@@ -70,6 +72,10 @@ public class ShareFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 progressBar.setVisibility(View.VISIBLE);
+                /**w следует сделать проверку версии аналогично остальным методам
+                 *   в {@link com.example.anmobiletest.api.camera.GetApiMethods}
+                 *   вместо прямного использования /product/version
+                 */
             getVersion(s.toString()+"/product/version")
                     .delay(5, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
@@ -95,7 +101,9 @@ public class ShareFragment extends Fragment {
 
                         @Override
                         public void onComplete() {
-
+                            //e не выполнится никогда
+                            // потому, что при проверке доступности сервера не используется авторизация,
+                            // будет вечная ошибка 401
                             progressBar.setVisibility(View.INVISIBLE);
                             submit_button.setEnabled(true);
                         }

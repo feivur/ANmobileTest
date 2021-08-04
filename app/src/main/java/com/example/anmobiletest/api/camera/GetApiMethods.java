@@ -14,6 +14,8 @@ import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 public interface GetApiMethods {
+
+    //i хидеры нужно добавлять в interceptor-ах запроса в httpClient
     @Headers({
             "User-Agent: OkHttp",
             "Content-Type: application/json"

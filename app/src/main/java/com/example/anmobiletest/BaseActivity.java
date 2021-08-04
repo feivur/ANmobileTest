@@ -23,6 +23,7 @@ abstract class BaseActivity extends AppCompatActivity {
 
 
     public void setupActivity(BottomNavigationView bottomNavigationView) {
+        //w надо создавать фрагменты при необходимости, а не все сразу
         Home = new HomeFragment();
         Likes = new LikesFragment();
         Profile = new ProfileFragment();
@@ -36,8 +37,9 @@ abstract class BaseActivity extends AppCompatActivity {
                     final int previousItem = bottomNavigationView.getSelectedItemId();
                     final int nextItem = item.getItemId();
                     if (previousItem != nextItem) {
+                        //w много лишнего кода
+                        // нет смысла искать item каждый раз, ведь он уже получен в nextItem
                         switch (item.getItemId()) {
-
                             case R.id.home:
                                 bottomNavigationView.getMenu().findItem(R.id.home).setChecked(true);
                                 loadFragment(Home);
