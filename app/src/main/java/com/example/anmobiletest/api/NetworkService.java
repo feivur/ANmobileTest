@@ -22,53 +22,43 @@ public class NetworkService {
     private final OkHttpClient.Builder httpClient;
 
     private final Retrofit.Builder builder;
-    private String BASE_URL = "http://192.168.1.66:80/";
-    private String login;
-    private String pass;
+    String BASE_URL = HomeActivity.mSettings.getString(APP_PREFERENCES_URL, "http://try.axxonsoft.com:8000/asip-api/");
+    String login = HomeActivity.mSettings.getString(APP_PREFERENCES_LOGIN, "root");
+    String pass = HomeActivity.mSettings.getString(APP_PREFERENCES_PASSWORD, "root");
 
 
     private NetworkService() {
 
-        if(HomeActivity.mSettings.contains(APP_PREFERENCES_URL)){
-           BASE_URL =HomeActivity.mSettings.getString(APP_PREFERENCES_URL,"error");
-            login =HomeActivity.mSettings.getString(APP_PREFERENCES_LOGIN,"error");
-            pass =HomeActivity.mSettings.getString(APP_PREFERENCES_PASSWORD,"error");
-
-       }
-
         httpClient = new OkHttpClient.Builder()
-                .authenticator((route, response) -> {
-                    Request request = response.request();
-                    if (request.header("Authorization")!=null)
-                        return null;
-                    return request.newBuilder()
-                            .header("Authorization", Credentials.basic(login,pass))
+                .addInterceptor(chain -> {
+                    Request request = chain.request().newBuilder()
+                            .addHeader("User-Agent", "android")
+                            .addHeader("Authorization", Credentials.basic(login, pass))
                             .build();
+                    return chain.proceed(request);
                 });
 
         RxJava3CallAdapterFactory rxAdapter = RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io());
 
         builder = new Retrofit.Builder()
-                .baseUrl(BASE_URL+"/")
+                .baseUrl(BASE_URL + "/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(rxAdapter);
 
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
-            httpClient.addInterceptor(logging)
-                    .build();
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        httpClient.addInterceptor(logging)
+                .build();
 
     }
 
     public static NetworkService getInstance() {
-        if (mInstance == null) {
-            mInstance = new NetworkService();
-        }
+        mInstance = new NetworkService();
         return mInstance;
     }
 
     public <RESTService> RESTService createService(Class<RESTService> service) {
-        Retrofit retrofit = builder.client(httpClient.connectTimeout(10, TimeUnit.MINUTES).build()).build();
+        Retrofit retrofit = builder.client(httpClient.connectTimeout(1, TimeUnit.MINUTES).build()).build();
         return retrofit.create(service);
     }
 }

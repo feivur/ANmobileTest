@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,7 @@ import com.example.anmobiletest.HomeActivity;
 import com.example.anmobiletest.R;
 import com.example.anmobiletest.api.NetworkService;
 import com.example.anmobiletest.api.camera.GetApiMethods;
+import com.jakewharton.processphoenix.ProcessPhoenix;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,51 +27,50 @@ import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.ResponseBody;
-import pl.droidsonroids.gif.GifImageView;
 
 import static com.example.anmobiletest.HomeActivity.APP_PREFERENCES_LOGIN;
 import static com.example.anmobiletest.HomeActivity.APP_PREFERENCES_PASSWORD;
 import static com.example.anmobiletest.HomeActivity.APP_PREFERENCES_URL;
 
-public class ShareFragment extends Fragment {
-    GetApiMethods getApiMethods = NetworkService.getInstance().createService(GetApiMethods.class);
+public class ConnectionFragment extends Fragment {
+    GetApiMethods getApiMethods;
     private Button submit_button;
 
     String url;
     View root;
 
 
-    public ShareFragment() {
+    public ConnectionFragment() {
     }
 
-    public static ShareFragment newInstance() {
-        return new ShareFragment();
+    public static ConnectionFragment newInstance() {
+        return new ConnectionFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        root = inflater.inflate(R.layout.fragment_share, container, false);
+        root = inflater.inflate(R.layout.fragment_connection, container, false);
         EditText inputUrl = root.findViewById(R.id.url_input);
         EditText loginText = root.findViewById(R.id.login_input);
         EditText passwordText = root.findViewById(R.id.password_input);
+        SharedPreferences.Editor editor = HomeActivity.mSettings.edit();
+
         submit_button = root.findViewById(R.id.submit_input);
-        GifImageView progressBar = root.findViewById(R.id.progress_bar);
-        progressBar.setVisibility(View.INVISIBLE);
         submit_button.setEnabled(false);
 
         inputUrl.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                getApiMethods=NetworkService.getInstance().createService(GetApiMethods.class);
 
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                progressBar.setVisibility(View.VISIBLE);
-            getVersion(s.toString()+"/product/version")
-                    .delay(5, TimeUnit.SECONDS)
+            getVersion(s.toString())
+                    .delay(2, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<ResponseBody>() {
@@ -89,14 +88,12 @@ public class ShareFragment extends Fragment {
                         @Override
                         public void onError(@NonNull Throwable e) {
                             submit_button.setEnabled(false);
-                            progressBar.setVisibility(View.INVISIBLE);
 
                         }
 
                         @Override
                         public void onComplete() {
 
-                            progressBar.setVisibility(View.INVISIBLE);
                             submit_button.setEnabled(true);
                         }
                     });
@@ -110,17 +107,50 @@ public class ShareFragment extends Fragment {
             }
         });
 
-                submit_button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                SharedPreferences.Editor editor = HomeActivity.mSettings.edit();
-                editor.putString(APP_PREFERENCES_URL, url);
+        loginText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
                 editor.putString(APP_PREFERENCES_LOGIN, loginText.getText().toString());
+                editor.apply();
+            }
+        });
+
+
+        passwordText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
                 editor.putString(APP_PREFERENCES_PASSWORD, passwordText.getText().toString());
                 editor.apply();
 
-
             }
         });
+
+                submit_button.setOnClickListener(v -> {
+                    editor.putString(APP_PREFERENCES_URL, url);
+                    editor.apply();
+                    ProcessPhoenix.triggerRebirth(root.getContext());
+
+                });
 
         return root;
     }
