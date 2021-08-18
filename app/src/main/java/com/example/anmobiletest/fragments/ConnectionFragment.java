@@ -57,6 +57,8 @@ public class ConnectionFragment extends Fragment {
         EditText passwordText = root.findViewById(R.id.password_input);
         SharedPreferences.Editor editor = HomeActivity.mSettings.edit();
 
+        //E После ввода параметров, при повторном отображении экрана такущие URL и логин не отображаются в полях.
+
         submit_button = root.findViewById(R.id.submit_input);
         submit_button.setEnabled(false);
 
@@ -69,6 +71,10 @@ public class ConnectionFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //E Если при вводе текста ответ об ошибке соединения придёт позже ответа об успешном соединении,
+                //  кнопка моргнёт и станет опять недоступной. Надо или прерывать текущую проверку доступности url
+                //  перед запуском следующей, или лучше вообще не запрещать кнопку, и делать проверку по клику,
+                //  с сообщением об ошибке или успехе в виде toast.
             getVersion(s.toString())
                     .delay(2, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
@@ -148,6 +154,7 @@ public class ConnectionFragment extends Fragment {
                 submit_button.setOnClickListener(v -> {
                     editor.putString(APP_PREFERENCES_URL, url);
                     editor.apply();
+                    //W Жесткий ход - рестартовать весь процесс. А если у нас "дорогая" инициализация приложения?
                     ProcessPhoenix.triggerRebirth(root.getContext());
 
                 });

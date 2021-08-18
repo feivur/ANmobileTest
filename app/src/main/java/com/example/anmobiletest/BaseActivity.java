@@ -22,6 +22,8 @@ abstract class BaseActivity extends AppCompatActivity {
 
 
     public void setupActivity(BottomNavigationView bottomNavigationView) {
+
+        //W мы же обсуждали, что так делать не стоит. Эти фрагменты вообще не нужно хранить.
         Home = new HomeFragment();
         Likes = new LikesFragment();
         Profile = new ProfileFragment();
@@ -30,12 +32,44 @@ abstract class BaseActivity extends AppCompatActivity {
 
 
         bottomNavigationView.setOnItemSelectedListener(
+
+                //I всё еще костыльно
+                // стоит перенести вызов overridePendingTransition в loadFragment()
+
+                //I код следует форматировать в CamelCase https://en.wikipedia.org/wiki/Camel_case
+                // переменныеТак, КлассыТак.
+                // Лайфхак: Ctrl+Alt+L форматирует код автоматически. Только имена не исправляет.
+
+
                 item -> {
                     final int previousItem = bottomNavigationView.getSelectedItemId();
                     final int nextItem = item.getItemId();
                     if (previousItem != nextItem) {
-                        switch (nextItem) {
 
+                        /* // Код мог выглядеть так. Лучше же?
+
+                        item.setChecked(true);
+                        switch (nextItem) {
+                            case R.id.home:
+                                loadFragment(new HomeFragment());
+                                break;
+                            case R.id.search:
+                                loadFragment(new SearchFragment());
+                                break;
+                            case R.id.share:
+                                loadFragment(new ConnectionFragment());
+                                break;
+                            case R.id.likes:
+                                loadFragment(new LikesFragment());
+                                break;
+                            case R.id.profile:
+                                loadFragment(new ProfileFragment());
+                                break;
+                        }
+
+                        */
+
+                        switch (nextItem) {
                             case R.id.home:
                                 if (Home == null)
                                     Home = new HomeFragment();

@@ -55,7 +55,7 @@ public class FeedAdaptersHome extends RecyclerView.Adapter<FeedAdaptersHome.Feed
     public void filter(Collection<Post> posts,String cameraName) {
         eventList.clear();
             for(Post item: posts){
-                if(item.getCameraName()==cameraName){
+                if(item.getCameraName()==cameraName){ //Е строки нельзя сравнивать оператором ==, только .equals()
                     eventList.add(item);
                 }
             }
@@ -69,6 +69,8 @@ public class FeedAdaptersHome extends RecyclerView.Adapter<FeedAdaptersHome.Feed
         public void bind(Post Post) {
             userName.setText(Post.getCameraName());
             postImage.setImageDrawable(Post.getPostImage());
+
+            //W Время надо форматировать в человекочитаемый вид
             postInfo.setText("Тип детектора: " + Post.getPostInfo() + "\nВремя срабатываения: " + Post.getPostTime());
 
 

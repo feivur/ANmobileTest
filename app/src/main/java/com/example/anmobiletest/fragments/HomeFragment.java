@@ -49,6 +49,11 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
 
     View root;
 
+    //E Не выполнено условие задания: Feed with background check for a new events
+    // должна быть фоновая проверка новых событий
+    //
+    //E Не выполнено условие задания: Detail view with hi resolution snapshot
+    // нужно сделать, чтобы по клику на событие открывалось окно с детальным просмотром события
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -141,6 +146,11 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
         feedAdapter = new FeedAdaptersHome();
         postRecyclerView.setAdapter(feedAdapter);
         postRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            //W какая-то стремная реализация дозагрузки. Если уже делать это, то надо использовать paging
+            // впрочем, это сложно и не обязательно
+            // https://developer.android.com/topic/libraries/architecture/paging/v3-overview
+
             @Override
             public void onScrollStateChanged(@androidx.annotation.NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);

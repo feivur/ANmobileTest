@@ -16,7 +16,12 @@ public class PostDataMaker {
     Observable<Camera> cameras = getCamera();
 
     public Observable<Post> getPostsObservable(int limit, int offset, int join) {
-        //i нечитаемо, такое надо форматировать
+        //E Не стоит сразу запрашивать картинки для каждого события.
+        // Их может быть очень много, и можно даже не дождаться, когда всё загрузится.
+        // картинки надо запрашивать при биндинге ViewHolder
+
+        //I напрашивается сделать замену hosts в методе getAccessPoint()
+        //I и что будет, если по несчастливой случайности последовательность "hosts" встретится в середине строки?
         return cameras.flatMap(camera ->
                 getEvents(camera.getArchives().get(0).getAccessPoint().replace("hosts", ""), limit, offset, join)
                         .concatMap(event -> getdetectorImage(camera.getArchives().get(0)
