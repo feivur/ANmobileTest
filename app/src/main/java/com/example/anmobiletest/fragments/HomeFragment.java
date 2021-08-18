@@ -1,19 +1,16 @@
 package com.example.anmobiletest.fragments;
 
-import android.Manifest;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,7 +30,6 @@ import com.example.anmobiletest.api.pojomodels.Post;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
@@ -51,17 +47,6 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
 
     Collection<Post> posts = new ArrayList<>();
 
-    //w эти разрешения точно нужны?
-    // По условию задания нужен только INTERNET, и то, запрашивать его не нужно
-    String[] permissions = new String[]{
-            Manifest.permission.INTERNET,
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.VIBRATE,
-    };
-
-
     View root;
 
 
@@ -74,34 +59,13 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
         postRecyclerView = root.findViewById(R.id.feed_recycler);
         initRecyclerView(postRecyclerView);
         refresher = root.findViewById(R.id.refresher);
-        checkPermissions();
-
         loadPosts(5, 5, 1);
-
         startServiceAlaramManager();
         refresher.setOnRefreshListener(() -> loadPosts(5, 5, 1));
 
         return root;
 
     }
-
-
-    private boolean checkPermissions() {
-        int result;
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        for (String p : permissions) {
-            result = ContextCompat.checkSelfPermission(getActivity(), p);
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(p);
-            }
-        }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(getActivity(), listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 100);
-            return false;
-        }
-        return true;
-    }
-
 
     public void loadPosts(int limit, int offset, int join) {
         cameraRQ.getPostsObservable(limit, offset, join).subscribeOn(Schedulers.io())
@@ -116,22 +80,7 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
                     @Override
                     public void onNext(@NonNull Post post) {
 
-                        Glide.with(root.getContext())
-                                .load(post.getPostImageUrl())
-                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .centerCrop()
-                                .fitCenter()
-                                .into(new CustomTarget<Drawable>() {
-                                    @Override
-                                    public void onResourceReady(@androidx.annotation.NonNull Drawable resource, Transition<? super Drawable> transition) {
-                                        post.setPostImage(resource);
-                                    }
-
-                                    @Override
-                                    public void onLoadCleared(Drawable placeholder) {
-
-                                    }
-                                });
+                        saveImage(post);
                         posts.add(post);
 
                     }
@@ -151,6 +100,25 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
                 });
 
 
+    }
+
+    private void saveImage(Post post) {
+        Glide.with(root.getContext())
+                .load(post.getPostImageUrl())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .fitCenter()
+                .into(new CustomTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@androidx.annotation.NonNull Drawable resource, Transition<? super Drawable> transition) {
+                        post.setPostImage(resource);
+                    }
+
+                    @Override
+                    public void onLoadCleared(Drawable placeholder) {
+
+                    }
+                });
     }
 
     public void startServiceAlaramManager() {

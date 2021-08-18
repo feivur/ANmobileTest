@@ -15,11 +15,13 @@ public class PostDataMaker {
     GetApiMethods getApiMethods = NetworkService.getInstance().createService(GetApiMethods.class);
     Observable<Camera> cameras = getCamera();
 
-
     public Observable<Post> getPostsObservable(int limit, int offset, int join) {
         //i нечитаемо, такое надо форматировать
         return cameras.flatMap(camera ->
-                getEvents(camera.getArchives().get(0).getAccessPoint().replace("hosts", ""), limit, offset, join).concatMap(event -> getdetectorImage(camera.getArchives().get(0).getAccessPoint().replace("hosts", ""), event.getTimestamp(), event.getId()).map(image -> new Post(camera.getDisplayName(), image.bytes(), event.getType(), event.getTimestamp()))));
+                getEvents(camera.getArchives().get(0).getAccessPoint().replace("hosts", ""), limit, offset, join)
+                        .concatMap(event -> getdetectorImage(camera.getArchives().get(0)
+                                .getAccessPoint().replace("hosts", ""), event.getTimestamp(), event.getId())
+                                .map(image -> new Post(camera.getDisplayName(), image.bytes(), event.getType(), event.getTimestamp()))));
 
     }
 

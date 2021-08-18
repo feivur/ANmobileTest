@@ -15,46 +15,20 @@ import retrofit2.http.Url;
 
 public interface GetApiMethods {
 
-    //i хидеры нужно добавлять в interceptor-ах запроса в httpClient
-    @Headers({
-            "User-Agent: OkHttp",
-            "Content-Type: application/json"
-    })
     @GET("camera/list")
     Observable<allCameras> getCameras();
 
-
-    @Headers({
-            "User-Agent: OkHttp",
-            "Content-Type: application/json"
-    })
     @GET("archive/events/detectors{videoSourceId}/past/future")
     Observable<AllEvents> getEvents(@Path(value = "videoSourceId", encoded = true) String videoSourceId, @Query("limit") int limit, @Query("offset") int offset, @Query("join") int join);
 
-    @Headers({
-            "User-Agent: OkHttp",
-            "content-type: image/jpeg"
-    })
     @GET("archive/media{videoSourceId}/{time}/")
     Observable<ResponseBody> getDetectorImage(@Path(value = "videoSourceId", encoded = true) String videoSourceId, @Path(value = "time", encoded = true) String time);
 
-
-    @Headers({
-            "User-Agent: OkHttp",
-            "Content-Type: application/json"
-
-    })
     @GET("archive/events/detectors/")
     Observable<AllEvents> getEventsAllCamera();
 
-
-    @Headers({
-            "User-Agent: OkHttp Example",
-            "Content-Type: application/json"
-
-    })
-    @GET
-    Observable<ResponseBody> getVersion(@Url String fullUrl);
+    @GET ("{baseUrl}/product/version/")
+    Observable<ResponseBody> getVersion(@Path(value = "baseUrl", encoded = true) String baseUrl);
 
 
 }
