@@ -9,7 +9,7 @@ public class Archive {
     private String accessPoint;
 
     public String getAccessPoint() {
-        return accessPoint;
+        return accessPoint.replaceFirst("^hosts", "");
     }
 
     public void setAccessPoint(String accessPoint) {
