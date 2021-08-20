@@ -85,7 +85,7 @@ public class Event implements Serializable
     }
 
         public String getSource() {
-        return source;
+        return source.replaceAll("^hosts", "");
     }
 
         public void setSource(String source) {

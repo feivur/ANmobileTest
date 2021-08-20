@@ -1,39 +1,37 @@
 package com.example.anmobiletest;
 
-import android.app.FragmentManager;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.anmobiletest.database.DataBaseCreate;
+import com.example.anmobiletest.database.UserData;
 import com.example.anmobiletest.fragments.HomeFragment;
+import com.example.anmobiletest.user.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 
 public class HomeActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
-    public static final String APP_PREFERENCES = "ANmobile";
-    public static final String APP_PREFERENCES_URL="url";
-    public static final String APP_PREFERENCES_LOGIN = "login";
-    public static final String APP_PREFERENCES_PASSWORD = "password";
-    public static SharedPreferences mSettings;
-    Fragment Home;
 
+    User user;
+    Fragment Home;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
-        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation_menu);
+        DataBaseCreate.createDB(getBaseContext());
+        user = UserData.getUser();
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation_menu);
         setupActivity(bottomNavigationView);
         Home = new HomeFragment();
+        startServiceAlaramManager();
         loadFragment(Home);
 
     }
+
     private void loadFragment(Fragment fragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_content, fragment);
@@ -41,9 +39,16 @@ public class HomeActivity extends BaseActivity {
     }
 
 
+    public void startServiceAlaramManager() {
+        Intent intentMyIntentService = new Intent(this, ServerChangedService.class);
+        startService(intentMyIntentService);
+    }
+
+
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
 
     }
+
 }
