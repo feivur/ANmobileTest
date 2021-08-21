@@ -2,11 +2,13 @@ package com.example.anmobiletest;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.example.anmobiletest.api.camera.PostDataMaker;
 import com.example.anmobiletest.api.pojomodels.Post;
+import com.example.anmobiletest.api.pojomodels.event.Event;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
@@ -32,19 +34,22 @@ public class ServerChangedService extends IntentService {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            cameraRQ.getPostsObservable(1, 0, 1).subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Post>() {
+
+            cameraRQ.getEvents(1,0,0).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Event>() {
                         @Override
                         public void onSubscribe(@NonNull Disposable d) {
+
                         }
 
                         @Override
-                        public void onNext(@NonNull Post post) {
-                            if (!post.getPostTime().equals(prevTime)) {
-                                prevTime = post.getPostTime();
+                        public void onNext(@NonNull Event event) {
+                            if (!event.getTimestamp().equals(prevTime)) {
+                                prevTime = event.getTimestamp();
+                                Log.d("asd","asd23");
                                 Toast toast = Toast.makeText(getApplicationContext(),
-                                        "Новое событие", Toast.LENGTH_LONG);
+                                        "Новое событие детектора", Toast.LENGTH_LONG);
                                 toast.show();
                             }
                         }
@@ -59,6 +64,7 @@ public class ServerChangedService extends IntentService {
 
                         }
                     });
+
         }
 
     }

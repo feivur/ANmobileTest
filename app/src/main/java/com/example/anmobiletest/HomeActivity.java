@@ -1,5 +1,8 @@
 package com.example.anmobiletest;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -12,11 +15,15 @@ import com.example.anmobiletest.fragments.HomeFragment;
 import com.example.anmobiletest.user.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Calendar;
+
+
 public class HomeActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
 
     User user;
     Fragment Home;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +47,7 @@ public class HomeActivity extends BaseActivity {
 
 
     public void startServiceAlaramManager() {
-        Intent intentMyIntentService = new Intent(this, ServerChangedService.class);
-        startService(intentMyIntentService);
+        getApplicationContext().startService(new Intent(getApplicationContext(), ServerChangedService.class));
     }
 
 
@@ -50,5 +56,6 @@ public class HomeActivity extends BaseActivity {
         super.onStart();
 
     }
+
 
 }

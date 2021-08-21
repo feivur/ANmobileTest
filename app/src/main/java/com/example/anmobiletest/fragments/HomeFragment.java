@@ -56,7 +56,6 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
             feedAdapter.clearItems();
         });
         loadPosts(20, 5, 1);
-
         return root;
 
     }
