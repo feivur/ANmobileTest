@@ -12,13 +12,5 @@
         android:id="@+id/share"
         android:icon="@drawable/ic_share"
         android:title="" />
-    <item
-        android:id="@+id/likes"
-        android:icon="@drawable/ic_likes"
-        android:title="" />
-    <item
-        android:id="@+id/profile"
-        android:icon="@drawable/ic_profile"
-        android:title="" />
 
 </menu>

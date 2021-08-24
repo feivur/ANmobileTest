@@ -1,11 +1,10 @@
 package com.example.anmobiletest.fragments;
 
-
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.anmobiletest.R;
 import com.example.anmobiletest.ServerChangedService;
 import com.example.anmobiletest.adapters.FeedAdaptersHome;
@@ -37,37 +32,30 @@ import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
+
 public class HomeFragment extends Fragment implements LifecycleOwner {
-    private RecyclerView postRecyclerView;
+    private final PostDataMaker cameraRQ = new PostDataMaker();
     private SwipeRefreshLayout refresher;
     private FeedAdaptersHome feedAdapter;
-    private PostDataMaker cameraRQ = new PostDataMaker();
     private Boolean isLoading = false;
-    int offset = 0;
+    private int offset = 0;
 
     Collection<Post> posts = new ArrayList<>();
-
     View root;
-
-    //E Не выполнено условие задания: Feed with background check for a new events
-    // должна быть фоновая проверка новых событий
-    //
-    //E Не выполнено условие задания: Detail view with hi resolution snapshot
-    // нужно сделать, чтобы по клику на событие открывалось окно с детальным просмотром события
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
         root = inflater.inflate(R.layout.fragment_home, container, false);
-        postRecyclerView = root.findViewById(R.id.feed_recycler);
+        RecyclerView postRecyclerView = root.findViewById(R.id.feed_recycler);
         initRecyclerView(postRecyclerView);
         refresher = root.findViewById(R.id.refresher);
-        loadPosts(5, 5, 1);
-        startServiceAlaramManager();
-        refresher.setOnRefreshListener(() -> loadPosts(5, 5, 1));
-
+        refresher.setOnRefreshListener(() -> {
+            loadPosts(20, 5, 1);
+            feedAdapter.clearItems();
+        });
+        loadPosts(20, 5, 1);
         return root;
 
     }
@@ -80,20 +68,19 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
                     public void onSubscribe(@NonNull Disposable d) {
                         refresher.setRefreshing(true);
                         posts.clear();
+                        feedAdapter.notifyDataSetChanged();
                     }
 
                     @Override
                     public void onNext(@NonNull Post post) {
-
-                        saveImage(post);
                         posts.add(post);
-
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
                         feedAdapter.setItems(posts);
                         feedAdapter.notifyDataSetChanged();
+                        refresher.setRefreshing(false);
                     }
 
                     @Override
@@ -107,38 +94,6 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
 
     }
 
-    private void saveImage(Post post) {
-        Glide.with(root.getContext())
-                .load(post.getPostImageUrl())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .fitCenter()
-                .into(new CustomTarget<Drawable>() {
-                    @Override
-                    public void onResourceReady(@androidx.annotation.NonNull Drawable resource, Transition<? super Drawable> transition) {
-                        post.setPostImage(resource);
-                    }
-
-                    @Override
-                    public void onLoadCleared(Drawable placeholder) {
-
-                    }
-                });
-    }
-
-    public void startServiceAlaramManager() {
-
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.SECOND, 10);
-        Intent intent = new Intent(getActivity(), ServerChangedService.class);
-        PendingIntent pintent = PendingIntent.getService(getActivity(), 0, intent, 0);
-        AlarmManager alarm = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-                60000, pintent);
-
-        getActivity().startService(new Intent(getActivity(), ServerChangedService.class));
-    }
-
 
     private void initRecyclerView(RecyclerView postRecyclerView) {
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
@@ -146,11 +101,6 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
         feedAdapter = new FeedAdaptersHome();
         postRecyclerView.setAdapter(feedAdapter);
         postRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            //W какая-то стремная реализация дозагрузки. Если уже делать это, то надо использовать paging
-            // впрочем, это сложно и не обязательно
-            // https://developer.android.com/topic/libraries/architecture/paging/v3-overview
-
             @Override
             public void onScrollStateChanged(@androidx.annotation.NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -174,6 +124,8 @@ public class HomeFragment extends Fragment implements LifecycleOwner {
             }
         });
     }
+
+
 
 
 }

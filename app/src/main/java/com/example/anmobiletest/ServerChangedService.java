@@ -1,87 +1,71 @@
 package com.example.anmobiletest;
 
-import android.app.Service;
+import android.app.IntentService;
 import android.content.Intent;
-import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 
-import com.example.anmobiletest.api.NetworkService;
-import com.example.anmobiletest.api.camera.GetApiMethods;
+import com.example.anmobiletest.api.camera.PostDataMaker;
+import com.example.anmobiletest.api.pojomodels.Post;
 import com.example.anmobiletest.api.pojomodels.event.Event;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class ServerChangedService extends Service {
-    GetApiMethods getApiMethods = NetworkService.getInstance().createService(GetApiMethods.class);
-    List<String> listEvent= new ArrayList<>();
-    List<String> listEventBuf= new ArrayList<>();
+public class ServerChangedService extends IntentService {
+    private final PostDataMaker cameraRQ = new PostDataMaker();
+    String prevTime = "0";
+
     public ServerChangedService() {
-
-    }
-
-
-    public Observable<Event> getEvents() {
-        return getApiMethods.getEventsAllCamera().concatMapIterable(events -> events);
-
+        super("newEventListener");
     }
 
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        getEvents().map(event -> event)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Event>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+    protected void onHandleIntent(@Nullable Intent intent) {
 
-                    }
+        while (true) {
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-                    @Override
-                    public void onNext(@NonNull Event event) {
-                        listEvent.add(event.getTimestamp());
-                    }
+            cameraRQ.getEvents(1,0,0).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Event>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
+                        }
 
-                    }
+                        @Override
+                        public void onNext(@NonNull Event event) {
+                            if (!event.getTimestamp().equals(prevTime)) {
+                                prevTime = event.getTimestamp();
+                                Log.d("asd","asd23");
+                                Toast toast = Toast.makeText(getApplicationContext(),
+                                        "Новое событие детектора", Toast.LENGTH_LONG);
+                                toast.show();
+                            }
+                        }
 
-                    @Override
-                    public void onComplete() {
+                        @Override
+                        public void onError(@NonNull Throwable e) {
 
-                    }
-                });
+                        }
 
-        if (!listEvent.equals(listEventBuf))
-        {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "Новое срабатывание детектора", Toast.LENGTH_SHORT);
+                        @Override
+                        public void onComplete() {
 
-            toast.show();
+                        }
+                    });
+
         }
-        else {
-            Log.d("Server", listEvent.toString());
-            Log.d("Server buffer", listEventBuf.toString());
-        }
-        listEventBuf=listEvent;
 
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
     }
 }
